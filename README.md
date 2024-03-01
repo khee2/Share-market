@@ -15,6 +15,7 @@ Item Details Page
 
 
 Reply Page
+
 <img width="957" alt="image" src="https://github.com/khee2/Share-market/assets/124848492/7a7104b6-51d1-41ca-9140-ea9ed9f808c7">
 
 
@@ -28,7 +29,8 @@ Registration Page
 ![KakaoTalk_20240301_205215661_07](https://github.com/khee2/Share-market/assets/124848492/07e33c35-5db0-466f-9a3c-37332d3897d9)
 <img width="960" alt="KakaoTalk_20221218_184017847_08" src="https://github.com/khee2/Share-market/assets/124848492/98866b56-11b2-48a9-bb62-4869a2cbefed">
 
-Login Page
+Login Page(will be Updated Soon)
+
 <img width="305" alt="image" src="https://github.com/khee2/Share-market/assets/124848492/a03b8f95-4171-4312-8a84-19dacf61a844">
 
 
