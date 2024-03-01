@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<title>회원가입</title>
+<style>
+#app {
+	margin: auto;
+	margin-top: 60px;
+	width: 60%;
+	border: 3px solid #8ac007;
+	padding: 10px;
+}
+
+table, th, td {
+	border: 1px solid black;
+}
+
+p {
+	font-size: 8px;
+}
+</style>
+</head>
+<body>
+
+	<h1>회원 가입</h1>
+
+	<div id="app">
+
+		<!-- <form id="frm" action="/addMember" method="post"> -->
+		<table>
+			<tr>
+				<td>아이디</td>
+				<td><input type="text" id="userid" placeholder="아이디" size="20" />
+					<p id="idcheck"></p>
+					<button type="button" id="idCheckBtn">중복확인</button></td>
+			</tr>
+			<tr>
+				<td>사용할 아이디</td>
+				<td><input type="text" id="id" name="id" size="20" readonly />
+				</td>
+			</tr>
+			<tr>
+				<td>비밀번호</td>
+				<td><input type="text" id="pwd" name="pwd" placeholder="비밀번호"
+					size="20" /></td>
+			</tr>
+			<tr>
+				<td>이름</td>
+				<td><input type="text" id="name" name="name" placeholder="이름"
+					size="20" /></td>
+			</tr>
+			<tr>
+				<td>이메일</td>
+				<td><input type="text" id="email" name="email"
+					placeholder="이메일 주소" size="20" /></td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<button type="button" id="account">회원가입</button>
+				</td>
+			</tr>
+		</table>
+		<!-- </form> -->
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+
+			// 아이디 중복 검사에 대한 로직이다. `getId`에 입력받은 아이디를 JSON 형식으로 POST 요청을 통해 넘겨준다.
+
+			// 이를 통해 서버단으로부터 전달받은 내용(`res`)가 각각 어떤 메시지를 리턴해주는가에 따른 작업을 처리한다.
+
+			$("#idCheckBtn").click(function() {
+				$.ajax({
+					url : "http://localhost:10002/getId",
+					type : "POST",
+					data : {
+						"id" : $("#userid").val()
+					},
+					success : function(res) {
+						// alert('success')
+						if (res.trim() == 'ok') {
+							$("#idcheck").html("사용 가능한 아이디입니다.");
+							$("#id").val($("#userid").val());
+						} else {
+							$("#idcheck").html("사용할 수 없는 아이디입니다.");
+							$("#userid").val("");
+							$("#userid").focus();
+						}
+					},
+					error : function() {
+						alert('error')
+					}
+				});
+			});
+			// 가입버튼을 클릭했을 때 처리해줄 내용
+			// addMember에 POST로 요청을 보낸다. 이 때 보낼 정보는 data로 지정된 JSON 형식의 자바스크립트 객체이다.
+			$("#account").click(function() {
+
+				$.ajax({
+					url : "http://localhost:10002/addMember",
+					type : "POST",
+					data : {
+						"id" : $("#id").val(),
+						"pwd" : $("#pwd").val(),
+						"name" : $("#name").val(),
+						"email" : $("#email").val(),
+						"auth" : 1
+					},
+
+					// 마찬가지로 리턴받은 메시지(res)의 결과에 따라 처리해준다.
+					success : function(res) {
+						if (res.trim() == 'ok') {
+							console.log(res);
+							alert("가입되었습니다!");
+							// location.href="login.html";
+						} else {
+							alert("가입되지 않았습니다!");
+							$("#userid").val("");
+							$("#pwd").val("");
+							$("#name").val("");
+							$("#email").val("");
+						}
+					}
+				});
+			});
+
+			// 아래는 넘겨줄 데이터가 많을 때 form 태그에 아이디를 부여해서 serialize() 메소드로 한번에 데이터를 넘겨주는 방법이다.
+			/*
+			$("#account").on("click", function() {
+
+			    let params = $("#frm").serialize();
+
+			    if($("#id").val() === "") {
+			        $("#idcheck").html("유효한 아이디가 아닙니다.");
+			    }
+
+			    $.ajax({
+			        url: "http://localhost:3000/addMember",
+			        type: "POST",
+			        data: params,
+			        success: function(res) {
+			            if(res.trim() == 'ok') {
+			                console.log(res);
+			                alert("가입되었습니다!");
+			                // location.href="login.html";
+			            } else {
+			                alert("가입되지 않았습니다!");
+			                $("#userid").val("");
+			                $("#pwd").val("");
+			                $("#name").val("");
+			                $("#email").val("");
+			            }
+			        }
+			    });
+			});
+			 */
+
+		});
+	</script>
+</body>
+</html>

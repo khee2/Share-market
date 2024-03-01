@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+  	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+<style>
+@media ( max-width : 918px) { /*viewport에 따라 다른 스타일을 적용하기 위해 미디어 쿼리 사용*/
+	.writer {
+		display: none;
+	}
+	.price {
+		display: none;
+	}
+	.hit {
+		display: none;
+	}
+}
+
+.dataRow:hover {
+	background: #ffc0cb;
+	cursor: pointer;
+}
+</style>
+<title>List</title>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/board/list.do">쉐어마켓</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="/board/list.do">Home</a></li>
+      <!-- 
+      <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">상품 둘러보기<span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a href="#">인기글</a></li>
+          <li><a href="#">최신글</a></li>
+          <li><a href="/board/first_page.do">지역 및 카테고리 선택</a></li>
+        </ul>
+      </li>
+      -->
+      <li><a href="#">이용안내</a></li>
+      <li><a href="#">공지사항</a></li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <!--<li><a href="#">채팅하기</a></li>-->
+      <!--<li><a href="/join.do"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>-->
+      <li><a href="/login.do"><span class="glyphicon glyphicon-log-in"></span> Login/Logout</a></li>      
+    </ul>
+  </div>
+</nav>
+  	<div class="container">
+		<h3>물품 리스트</h3>
+		<form method="get" action="/board/list.do" id="searchForm"
+			th:object="${pageMaker}">
+			<!-- pageMaker 안에 criteria 존재 -->
+			<div id="searchWrap" th:object="${criteria}">
+				<!-- criteria는 type과 keyword를 들고 있음. -->
+				<button class="btn btn-default" name="type" value="1">도서</button>
+				<button class="btn btn-default" name="type" value="2">행사용품</button>
+				<button class="btn btn-default" name="type" value="3">캠핑</button>
+				<button class="btn btn-default" name="type" value="4">생활 공구</button>
+				<button class="btn btn-default" name="type" value="5">건강 환경</button>
+				<button class="btn btn-default" name="type" value="6">교구</button>
+				<p></p>
+				<select name="type">
+					<option value="">검색 기준</option>
+					<option value="T">글 제목</option>
+					<option value="C">교환 지역</option>
+					<option value="W">글 작성자</option>
+				</select> 
+				<input id="keyword" name="keyword" />
+				<a href="javascript:void(0)" class="search">검색</a>
+			</div>
+		</form>
+		
+		<br>
+		<div class="row">
+			<th:block th:each="board:${list}">
+				<div class="col-md-3">
+					<div class="thumbnail">
+						<span class="dataRow">
+						<img th:src="${board.fileNameone}" alt="이미지가 없는 게시물임." style="width: 100%">								
+						<!--<img src="@{C:/upload/}+*{filePath}+@{/}+*{fileName}" alt="이미지가 없는 게시판입니다." style="width: 100%">-->
+							<div class="caption">
+								번호 : <span class="bno" th:text=${board.bno}></span> <br>
+								제목 : <span th:text=${board.title}></span>, 
+								작성자 : <span th:text=${board.writer}></span> <br> 
+								가격 : <span th:text=${board.price}></span> <br>
+								조회수 : <span th:text=${board.hit}></span> <br>
+								<br>
+								<br>
+								<th:block th:each="fl:${board.attachList}">
+									<span th:text=${fl.uuid}></span>
+								</th:block>
+							</div>
+						</span>
+					</div>
+				</div>
+			</th:block>
+			<!-- 
+			<th:block th:each="thum:${filethum2}">
+				<img
+					th:src="@{/image/} + ${thum.uploadPath} + @{/} + ${thum.fileName}"
+					alt="이미지가 없는 게시물임." style="width: 30%">
+			</th:block>-->
+		</div>
+		<a href="/board/register.do" class="btn btn-default">글쓰기</a>
+		<div th:object="${pageMaker}">
+			<div style="text-align: center;">
+				<a class="changePage" th:if="*{prev}" th:href="*{startPage-1}"><code>&lt;</code></a>
+				<th:block
+					th:each="num : ${#numbers.sequence(pageMaker.getStartPage(), pageMaker.getEndPage())}">
+					<code th:if="${pageMaker.criteria.getPageNum() == num}"
+						th:text="${num}"></code>
+					<a class="changePage"
+						th:unless="${pageMaker.criteria.getPageNum() == num}"
+						th:href="${num}"> <code th:text="${num}"></code></a>
+				</th:block>
+				<a class="changePage" th:if="*{next}" th:href="*{endPage+1}"><code>&gt;</code></a>
+			</div>
+			<form action="/board/list.do" th:object="${criteria}" name="pageForm">
+				<input type="hidden" name="pageNum" th:field="*{pageNum}"> <input
+					type="hidden" name="amount" th:field="*{amount}"> <input
+					type="hidden" name="type" th:field="*{type}"> <input
+					type="hidden" name="keyword" th:field="*{keyword}">
+			</form>
+			<br>
+			<br>
+		</div>
+	</div>
+	<!--
+		<table class="table">
+			<thead>
+				<tr>
+					<th>번호</th>
+					<th>제목</th>
+					<th class="writer">작성자</th>
+					<th class="price">가격</th>
+					<th class="hit">조회수</th>
+					<th class="attachList">첨부파일</th>
+				</tr>
+			</thead>
+			<tbody>
+				<th:block th:each="board:${list}">
+					<!-- th:each="변수 : 컬렉션" -->
+	<!-- list의 사이즈만큼 반복 -->
+	<!-- *{}는 th:object에서 선택한 객체에 접근한다. -->
+	<!-- th:object는 객체를 지정한다. -->
+	<!-- th:field는 id, value, name 등 속성을 자동으로 처리해줌. -->
+	<!-- <tr th:object="${board}" class="dataRow">
+						<td class="bno" th:text="*{bno}"></td>
+						<!-- 링크를 통해서 구현할 수도 있음. 
+						<td><a th:text="*{title}" th:href="@{/board/get.do(bno=*{bno}, inc=1)}"></a></td> -->
+	<!-- <td th:text="*{title}"></td>
+						<td class="writer" th:text="*{writer}"></td>
+						<td class="price" th:text="*{price}"></td>
+						<td class="hit" th:text="*{hit}"></td>
+						<td class="attachList" th:text="*{attachList}"></td>
+					</tr>
+				</th:block>
+			</tbody>
+		</table>
+		-->
+	<script
+		src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+	<script th:inline="javascript">
+	let bno = [[${bno}]];
+	let msg = [[${msg}]];
+	let pageForm = $(document.pageForm);
+	// let serachForm = $(document.searchForm);
+	let searchForm = $("#searchForm"); // id가 searchForm인 걸
+	
+//	console.log(bno);
+	$(document).ready(function(){
+//		alert("페이지 준비 완료");
+		if(bno == '' || history.state){
+			return;
+		}
+		
+		if(parseInt(bno) > 0){
+			alert("게시글 " + parseInt(bno) + "번이 등록되었습니다.");
+		}
+})
+	
+$("a.changePage").click(function(e){
+      //alert("ChangePage clicked");
+      e.preventDefault();
+      pageForm.find("input[name='pageNum']").val($(this).attr("href"));
+      pageForm.submit();
+   });
+	
+$("#searchForm a").on("click", function(e){
+	e.preventDefault();
+	if(!searchForm.find("option:selected").val()){
+		alert("검색 종류를 선택하세요");
+	} // 옵션이 선택되었는가
+	if(!searchForm.find("input[name='keyword']").val()){
+		alert("키워드를 입력하세요");
+		return false; // alert -> 제출하기 전 막는 과정
+	}
+	searchForm.submit();
+})
+</script>
+	<script th:inline="javascript">
+	$(function(){
+		$(".dataRow").click(function(){
+			var bno = $(this).find(".bno").text(); // 클릭한 곳의 bno 가져오기
+			location.href = "/board/get.do?bno="+bno+"&inc=1";
+		});
+	});
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+

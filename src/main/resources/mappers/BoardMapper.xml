@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+                        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.board.mappers.BoardMapper">
+	<select id="getList" resultType="boardVO">
+		<![CDATA[
+		select /*+ index_desc(tb PK_BOARD) */ 
+		* from tbl_board tb where bno > 0
+		]]>
+		<!-- CDATA 사용 이유 >는 태그를 관리하는게 아니고 그냥 문자임. 무시 부탁.-->
+	</select>
+	<sql id="criteria">
+		<if test="type !=null and keyword !=null"> <!-- 검색조건도 있고 검색어도 있다면 -->
+			<trim prefix="(" suffix=") AND" prefixOverrides="OR">
+				<foreach item="type" collection="typeArr"> <!-- typeArr로부터 가져온 type이 'T'라면 -->
+					<trim prefix="OR">
+						<choose>
+							<when test="type == 'T'.toString()">
+								(TITLE LIKE '%' || #{keyword} || '%')
+							</when>
+							<when test="type == 'C'.toString()">
+								(REGICODE LIKE '%' || #{keyword} || '%')
+							</when>
+							<when test="type == 'W'.toString()">
+								(WRITER LIKE '%' || #{keyword} || '%')
+							</when>
+							<when test="type == '1'.toString()">
+								(CATECODE LIKE '%' || #{type} || '%')
+							</when>
+							<when test="type == '2'.toString()">
+								(CATECODE LIKE '%' || #{type} || '%')
+							</when>
+							<when test="type == '3'.toString()">
+								(CATECODE LIKE '%' || #{type} || '%')
+							</when>
+							<when test="type == '4'.toString()">
+								(CATECODE LIKE '%' || #{type} || '%')
+							</when>
+							<when test="type == '5'.toString()">
+								(CATECODE LIKE '%' || #{type} || '%')
+							</when>
+							<when test="type == '6'.toString()">
+								(CATECODE LIKE '%' || #{type} || '%')
+							</when>																					
+						</choose>
+					</trim>
+				</foreach>
+			</trim>
+		</if>
+	</sql>
+	<!-- 리스트 (list) -->
+	<select id="getListWithPaging" resultType="boardVO">
+		<![CDATA[
+		select bno, title, content, writer, price, hit, fileNameone
+		from (
+				select /*+ index_desc(tb PK_BOARD) */ 
+					   rownum rn, bno, title, content, writer, price, hit, fileNameone
+				from   tbl_board tb 
+				where  
+		]]>
+		<include refid="criteria"></include> <!-- reference id가 criteria -->
+		<![CDATA[	
+				rownum <= #{pageNum} * #{amount}
+			 )
+		where rn > (#{pageNum} - 1) * #{amount}
+		]]>
+	</select>
+	<!-- 글쓰기 (write) -->
+	<insert id="insertSelectKey_bno">
+		/* 태그 안에서는 주석 처리를 이와 같은 태그로 해야함 */
+		/* 게시글 등록 전 다음 시퀀스를 가져와서
+		insertSelectKey_bno의 매개변수로 전달 */
+		<selectKey keyProperty="bno" order="BEFORE"
+			resultType="long">
+			select seq_board.nextval from dual
+		</selectKey>
+		/* 위에서 전달받은 bno를 사용한다. */
+		insert into tbl_board(bno, title, content, writer, price, regiCode, cateCode)
+		values (#{bno}, #{title}, #{content}, #{writer}, #{price}, #{regiCode}, #{cateCode})
+	</insert>
+	<!-- 글 보기 (view) -->
+	<select id="read" resultType="BoardVO">
+		select * from tbl_board where bno = #{bno} 
+	</select>
+	<!-- 글 삭제 (delete) -->
+	<delete id="delete">
+		delete from tbl_board where bno = #{bno}
+	</delete>
+	<!-- 글 수정 (update) -->
+	<update id="update">
+		update tbl_board
+		set title = #{title}
+		, content = #{content}
+		, writer = #{writer}
+		, price = #{price}
+		, fileNameone= #{fileNameone}
+		where bno = #{bno}
+	</update> 
+	<!-- 리스트 페이지 처리를 위한 전체 데이터 개수 getTotalRow -->
+	<select id="getTotal" resultType="_int">
+		<![CDATA[
+			select count(*) from tbl_board where
+		]]>
+		<include refid="criteria"></include> <!-- reference id(refid)가 criteria -->
+		
+		<![CDATA[
+			bno > 0
+		]]>
+	</select>
+	<!-- 조회수 1증가 (increase) -->
+	<update id="increase">
+		update tbl_board set hit = hit + 1
+		where bno = #{bno}
+	</update>
+</mapper>                        

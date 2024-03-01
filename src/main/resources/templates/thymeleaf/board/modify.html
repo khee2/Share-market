@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> 
+<link rel="stylesheet" href="/css/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/css/font-awesome-4.7.0/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<title>Modify</title>
+</head>
+<body>
+	<form method="post" action="/board/modify.do" th:object="${board}" >
+	<div class="container">
+		<h3>게시글 수정</h3>
+		<table class="table">
+			<tr>
+				<th>번호</th>
+				<td><input name="bno" type="text" th:field="*{bno}" readonly /></td>
+			</tr>
+			<tr>
+				<th>제목</th>
+				<td><input name="title" type="text" th:field="*{title}" /></td>
+			</tr>
+			<tr>
+				<th>내용</th>
+				<td><textarea name="content" rows="6" th:text="*{content}"></textarea></td>
+			</tr>
+			<tr>
+				<th>작성자</th>
+				<td><input name="writer" type="text" th:field="*{writer}" readonly /></td>
+			</tr>
+			<tr>
+				<th>가격</th>
+				<td><input name="price" type="text" th:field="*{price}"/></td>
+			</tr>	
+			<tr>
+				<th>조회수</th>
+				<td><input name="hit" type="text" th:field="*{hit}" readonly /></td>
+			</tr>
+		</table>
+		<input type="submit" class="btn btn-default" value="완료" />
+	</div>
+	</form>
+</body>
+</html>

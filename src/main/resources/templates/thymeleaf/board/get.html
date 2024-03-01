@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" /> 
+<link rel="stylesheet" href="/css/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/css/font-awesome-4.7.0/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<style>
+.line {
+	border-bottom: 1px solid #ff8b77;
+}
+</style>
+<script src="/js/reply.js"></script>
+<title>Get</title>
+</head>
+<body>
+	<form method="post" action="/board/remove.do" th:object="${board}" >
+	<div class="container">
+		<h3>물품 구체사항</h3>
+		<table class="table">
+			<tr>
+				<th>번호</th>
+				<td><input name="bno" type="text" th:field="*{bno}" readonly /></td>
+			</tr>
+			<tr>
+				<th>제목</th>
+				<td><input name="title" type="text" th:field="*{title}" readonly /></td>
+			</tr>
+			<tr>
+				<th>내용</th>
+				<td><textarea name="content" rows="6" th:text="*{content}" readonly></textarea></td>
+			</tr>
+			<tr>
+				<th>작성자</th>
+				<td><input name="writer" type="text" th:field="*{writer}" readonly /></td>
+			</tr>
+			<tr>
+				<th>가격</th>
+				<td><input name="price" type="text" th:field="*{price}" readonly /></td>
+			</tr>	
+			<tr>
+				<th>교환 지역</th>
+				<td><input name="regCode" type="text" th:field="*{regiCode}" readonly /></td>
+			</tr>
+			<tr>
+				<th>카테고리</th>
+				<td><input name="cateCode" type="text" th:field="*{cateCode}" readonly /></td>
+			</tr>	
+			<tr>
+				<th>조회수</th>
+				<td><input name="hit" type="text" th:field="*{hit}" readonly /></td>
+			</tr>					
+		</table>
+		<input type="button" class="btn btn-default" value="수정" onclick="goUpdate()" />
+		<input type="submit" class="btn btn-default" value="삭제" />
+		<input type="button" class="btn btn-default" value="첫 화면으로 돌아가기" onclick="goFirst()" />
+		<br><br><br>
+		<th:block th:each="thum:${filethum}">
+			<img th:src="@{/image/} + ${thum.uploadPath} + @{/} + ${thum.fileName}" alt="이미지가 없는 게시물임." style="width : 30%">
+		</th:block>
+	</div>
+	<br><br>
+	<div class="container">
+		<div><strong>댓글</strong></div>
+		<a href = "javascript:void(0)" class="register">댓글 등록</a>
+		<div class="register-form" style="display:none;"> <!-- default은 안보이게 -->
+			<table class="table">
+				<tr>
+					<th>작성자</th>
+					<td><input type="text" name="replier" placeholder="Replier" /></td>
+				</tr>
+				<tr>
+					<th>댓글</th>
+					<td><textarea rows="6" name="reply" placeholder="Reply"></textarea></td>
+				</tr>
+			</table>
+			<!-- css !important : 하위에서 변경 불가능 -->
+			<input type="button" class="btn btn-default finish" value="등록" /> <!-- 누르면 제출되기 때문에 1페이지로 돌아감. button 대신 input을 사용할 것 -->
+			<input type="button" class="btn btn-default cancel1" value="취소" /> <!-- 누르면 제출되기 때문에 1페이지로 돌아감. button 대신 input을 사용할 것 -->
+			<!-- <a href="javascript:void(0)" class="finish">등록</a>-->
+			<!--<a href="javascript:void(0)" class="cancel">취소</a>-->
+		</div>
+		<br><br>
+	<ul class="replies"></ul>
+	</div>
+		<!-- 
+		<strong>댓글</strong> <strong>user01</strong>
+		<p>Nice Shot!!</p>
+		<div class="line"></div>
+		<strong>댓글</strong> <strong>user01</strong>
+		<p>Nice Shot!!</p>
+		<div class="line"></div>
+		 -->
+	</form>
+</body>
+<!-- Scripts -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+	function goUpdate(){
+		let bno = /*[[${board.getBno()}]]*/
+		location.href='/board/modify.do?bno=' + bno;
+	}
+    /*]]>*/
+    /*<![CDATA[*/
+	function goFirst(){
+		location.href='/board/list.do';
+	}
+    /*]]>*/
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script>
+	
+	$(document).ready(function(){
+		console.log("JS TEST");
+		
+		let bnoValue = [[${board.getBno()}]]  /*board 객체에서 bno를 가져오기*/
+		let replyUL = $(".replies");
+		let pageNum = 1;
+		showList(pageNum);
+		
+		$(".register").on("click", function(e){  // 링크 클릭되었을 때
+			$(".register-form").show() // jquery 댓글 쓰는 창은 살아있게 하고 
+			$(this).hide(); // this = .register // 나는 사라지게 함. 
+		});
+
+		$(".cancel").on("click", function(e){
+			$(".register-form").hide();
+			$(".register").show();
+		});
+		$(".finish").on("click", function(e){
+			let replier = $("input[name='replier']").val();
+			let reply = $("textarea[name='reply']").val();
+			console.log(replier + ":"+reply);
+			if(replier =="" || replier==""){return;}
+			// 빈칸이 아니라면 아래 문장들 실행
+			replyService.add({bno:bnoValue, reply: reply, replier: replier}, 
+				function(result){
+				alert(result);
+				$("input[name='replier']").val(""); // replier의 값을 초기화
+				$("textarea[name='reply']").val(""); // reply의 값을 초기화
+				$(".register-form").hide();
+				$(".register").show();
+				pageNum=1;
+				showList(pageNum);
+				}
+			);
+		});
+		// showList(1); // 기본적으로는 1페이지를 입력받음. 
+		function showList(page){
+			replyService.getList({bno:bnoValue, page:page || 1},  // 페이지가 들어오면 그 페이지, 안 들어오면 1페이지로 매칭
+					function(list){
+						let str = "";
+						if(list == null || list.length == 0){
+							replyUL.html("");
+							return;
+						}
+						console.log("There are some replies");
+						for(let i=0, len=list.length;i<len;i++){
+							console.log(list[i].replier);
+							str += "<li style='display:block' data-rno='" +list[i].rno+ "'>"
+							str += "<strong>" + list[i].replier + "</strong>"
+							str += "<p>"+ list[i].reply + "</p>" + list[i].replyDate
+							str += "<div class='line'></dive></li>"
+						}
+						
+						replyUL.html(str); 
+					}); 
+			}
+/*	
+		replyService.add(
+				{reply:"JSTEST", replier:"tester", bno:bnoValue},
+				function(result){
+					alert("RESULT : " + result);
+				}
+			);
+*/
+/*		
+ 		replyService.getList(
+ 			{bno:bnoValue, page:1}, 
+ 			function(list){
+ 				console.log(list);
+ 			}		
+ 		);
+*/
+/*
+		replyService.remove(30, 
+			function(result){
+				alert("result : " + result);
+			}	
+		);
+		replyService.update(
+			{rno : 40, bno : bnoValue, reply : "Modified by JS"},
+			function(result){
+				alert("result : " + result)
+			}
+		);		
+		replyService.get(50,
+				function(result){
+					console.log(result);
+				}
+		);
+*/
+ 	})
+</script>
+</html>
